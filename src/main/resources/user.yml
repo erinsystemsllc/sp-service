@@ -1,0 +1,293 @@
+openapi: 3.0.3
+info:
+  title: Sp service API
+  description: Sp service API
+  version: 1.0.0
+servers:
+  - url: '/spApi'
+paths:
+  /user:
+    post:
+      summary: Creates new user
+      operationId: createUser
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreationRequest'
+      responses:
+        default:
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: CORS header
+
+          description: User data JSON model
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCreationResponse'
+  /user/{id}:
+    get:
+      summary: Gets user by id
+      operationId: getUser
+      tags:
+        - User
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: User ID
+      responses:
+        default:
+          description: User data JSON model
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUserResponse'
+  /project:
+    post:
+      summary: Creates new project
+      operationId: createProject
+      tags:
+        - Project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectCreationRequest'
+      responses:
+        default:
+          description: Project data JSON model
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectCreationResponse'
+  /project/update:
+    put:
+      summary: Update project board
+      operationId: updateProjectBoard
+      tags:
+        - Project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProjectBoardRequest'
+      responses:
+        default:
+          description: Project data JSON model
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateProjectBoardResponse'
+  /project/boards:
+    get:
+      summary: Fetches all project boards
+      operationId: getProjectBoards
+      tags:
+        - Project
+      responses:
+        default:
+          description: Project data JSON model
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectBoardsResponse'
+  /project/get-all:
+    get:
+      summary: Fetches all projects
+      operationId: getProjects
+      tags:
+        - Project
+      responses:
+        default:
+          description: Project data JSON model
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAllProjectResponse'
+  /sprint:
+    post:
+      summary: Creates new sprint
+      operationId: createSprint
+      tags:
+        - Sprint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SprintCreationRequest'
+      responses:
+        default:
+          description: Sprint data JSON model
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SprintCreationResponse'
+#  /sprint/get-all:
+#    get:
+#      summary: Fetches all sprints
+#      operationId: getAllSprints
+#      tags:
+#        - Sprint
+#      requestBody:
+#        required: true
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/SprintCreationRequest'
+#      responses:
+#        default:
+#          description: Sprint data JSON model
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/SprintCreationResponse'
+
+components:
+  schemas:
+    GenericError:
+      properties:
+        message:
+          type: string
+    GetUserResponse:
+      type: object
+      properties:
+        form:
+          $ref: '#/components/schemas/User'
+        error:
+          $ref: '#/components/schemas/GenericError'
+    ProjectBoardsResponse:
+      type: object
+      properties:
+        form:
+          $ref: '#/components/schemas/ProjectBoards'
+        error:
+          $ref: '#/components/schemas/GenericError'
+    ProjectBoards:
+      type: array
+      items:
+        type: string
+    SprintCreationRequest:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        startDate:
+          type: string
+        endDate:
+          type: string
+        projectId:
+          type: string
+        boardId:
+          type: string
+    SprintCreationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: id of the user
+        error:
+          $ref: '#/components/schemas/GenericError'
+    UserCreationRequest:
+      type: object
+      properties:
+        displayName:
+          type: string
+        email:
+          type: string
+        accountId:
+          type: string
+      required: [ "displayName", "email", "accountId" ]
+    UpdateProjectBoardRequest:
+      type: object
+      properties:
+        boardId:
+          type: string
+        projectCode:
+          type: string
+      required: [ "boardId", "projectCode" ]
+    UpdateProjectBoardResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: id of the user
+        error:
+          $ref: '#/components/schemas/GenericError'
+
+    UserCreationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: id of the user
+        error:
+          $ref: '#/components/schemas/GenericError'
+    ProjectCreationRequest:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        key:
+          type: string
+        imageUrl:
+          type: string
+      required: [ "code", "name", "key", "imageUrl" ]
+
+    ProjectCreationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: id of the user
+        error:
+          $ref: '#/components/schemas/GenericError'
+    User:
+      type: object
+      properties:
+        displayName:
+          type: string
+        id:
+          type: string
+        accountId:
+          type: string
+        email:
+          type: string
+      required: [ "displayName", "id", "accountId", "email" ]
+    GetAllProjectResponse:
+      type: object
+      properties:
+        projects:
+          type: array
+          items:
+            $ref: '#/components/schemas/Project'
+        error:
+          $ref: '#/components/schemas/GenericError'
+    Project:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        key:
+          type: string
+        imageUrl:
+          type: string

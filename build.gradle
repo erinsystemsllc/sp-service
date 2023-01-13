@@ -1,0 +1,101 @@
+plugins {
+  id 'org.openapi.generator' version "5.3.0"
+  id 'org.springframework.boot' version '2.5.4'
+  id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+  id 'java'
+}
+
+apply plugin: "java"
+
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+
+group = 'mn.erin.sp'
+status = 'development'
+version = '1.0.0-SNAPSHOT'
+
+repositories {
+
+  mavenCentral()
+  maven {
+    url "$artifactoryContextUrl/libs-snapshot"
+    credentials {
+      username = artifactoryUser
+      password = artifactoryApiKey
+    }
+    mavenContent {
+      snapshotsOnly()
+    }
+  }
+  maven {
+    url "$artifactoryContextUrl/libs-release"
+    credentials {
+      username = artifactoryUser
+      password = artifactoryApiKey
+    }
+    mavenContent {
+      releasesOnly()
+    }
+  }
+}
+
+void createOpenApiGenerateTask(String ymlName) {
+  String taskName = "openApiGenerate_" + ymlName;
+  task(taskName, type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
+    generatorName = "spring"
+    inputSpec = "$projectDir/src/main/resources/${ymlName}.yml".toString()
+    outputDir = "$buildDir/generated".toString()
+    apiPackage = "mn.erin.sp.rest"
+    invokerPackage = "mn.erin.sp.rest.invoker"
+    modelPackage = "mn.erin.sp.rest.model"
+    modelNameSuffix = "RestModel"
+    skipOperationExample = true
+    skipValidateSpec = false
+    configOptions = [
+        dateLibrary    : "java8",
+        delegatePattern: "true"
+    ]
+  }
+  compileJava.dependsOn(taskName)
+}
+
+String[] ymlNames = [
+    "user",
+]
+
+for (String ymlName : ymlNames) {
+  createOpenApiGenerateTask(ymlName);
+}
+
+sourceSets.main {
+  java { srcDir "$buildDir/generated/src/main/java" }
+}
+
+springBoot {
+  mainClass = "mn.erin.sp.SpApplication"
+}
+
+dependencies {
+  implementation 'mn.erin.ees.common:ees-common-domain:1.0.0-SNAPSHOT'
+  implementation 'org.apache.commons:commons-lang3:3.12.0'
+
+  implementation 'org.springframework.data:spring-data-mongodb:3.2.4'
+  implementation 'org.mongodb:mongo-java-driver:3.12.10'
+
+  implementation 'org.springframework.boot:spring-boot-starter-web'
+  implementation 'io.swagger:swagger-annotations:1.5.22'
+  implementation 'io.springfox:springfox-swagger2:2.9.2'
+  implementation 'io.springfox:springfox-swagger-ui:2.9.2'
+  implementation 'org.openapitools:jackson-databind-nullable:0.2.1'
+  implementation 'javax.validation:validation-api:2.0.1.Final'
+
+  testImplementation 'org.springframework.boot:spring-boot-starter-test'
+  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
+  testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
+  testImplementation 'org.mockito:mockito-junit-jupiter:4.0.0'
+
+}
+
+test {
+  useJUnitPlatform()
+}
